@@ -7,7 +7,7 @@ class Database:
         self.path_to_db = path_to_db
         self.create_cash_table()
         self.create_table_games()
-
+        self.create_gamers_table()
 
     @property
     def connection(self):
@@ -41,7 +41,6 @@ class Database:
         connection.close()
 
         return data
-
 
     @staticmethod
     def format_args(sql, parameters:dict):
@@ -79,19 +78,28 @@ class Database:
         return data[0][1]
 
 
-    def create_table_users(self):
+    def create_gamers_table(self):
         sql = '''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER,
-                username VARCHAR(255) NOT NULL,
-                game INTEGER,
-
-                wish_list VARCHAR(255),
-                letter_to_santa VARCHAR(255),
-                PRIMARY KEY (id)
+            CREATE TABLE IF NOT EXISTS gamers (
+                gamer_id INTEGER,
+                gamer_name VARCHAR(255) NOT NULL,
+                game_id INTEGER,
+                wish_list VARCHAR(1000),
+                letter_to_santa VARCHAR(1000),
+                e_mail VARCHAR(255),
+                PRIMARY KEY (gamer_id)
             );
         '''
         self.execute(sql, commit=True)
+
+
+    def add_gamer(self, gamer_id:int, gamer_name:str, game_id:int, wish_list:str, letter_to_santa:str, e_mail:str):
+        sql = '''
+            INSERT INTO gamers (gamer_id, gamer_name, game_id, wish_list, letter_to_santa, e_mail)
+            VALUES (?, ?, ?, ?, ?, ?)
+        '''
+        parameters = (gamer_id, gamer_name, game_id, wish_list, letter_to_santa, e_mail)
+        self.execute(sql, parameters=parameters, commit=True)
 
 
     def create_table_games(self):
@@ -120,6 +128,47 @@ class Database:
     def get_games_where_user_is_admin(self, id:int):
         sql = f'SELECT * FROM games WHERE admin_id={id}'
         data = self.execute(sql, fetchall=True)
+
+        return data
+
+
+    def get_game_id(self, admin_id:int, game_name:str):
+        '''
+        Возвращает id игры по admin_id и названию игры
+        '''
+        sql = 'SELECT * FROM games WHERE '
+
+        kwargs = {
+            'admin_id':admin_id,
+            'game_name':game_name
+        }
+
+        sql, parameters = self.format_args(sql, kwargs)
+        data = self.execute(sql, parameters, fetchall=True)
+
+        return data[0][0]
+
+
+    def get_all_gamers_from_game(self, game_id:int):
+        '''
+        Возвращает список кортежей из данных игроков, пример
+        [
+            (1111, 'IVAN', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru'), 
+            (2222, 'VASIA', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru'), 
+            (3333, 'KATE', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru'), 
+            (4444, 'DIMA', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru'), 
+            (5555, 'PETRA', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru')
+        ]
+        
+        '''
+        sql = 'SELECT * FROM gamers WHERE '
+
+        kwargs = {
+            'game_id':game_id
+        }
+
+        sql, parameters = self.format_args(sql, kwargs)
+        data = self.execute(sql, parameters, fetchall=True)
 
         return data
 
