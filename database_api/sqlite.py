@@ -123,7 +123,7 @@ class Database:
                 admin_id INTEGER,
                 sub_admin_id INTEGER,
                 game_name VARCHAR(255),
-                gift_costs INTEGER,
+                gift_costs VARCHAR(255),
                 gift_send_date VARCHAR(255),
                 game_link VARCHAR(255),
                 reg_end_date VARCHAR(255)
@@ -132,7 +132,7 @@ class Database:
         self.execute(sql, commit=True)
 
 
-    def add_game(self, game_name:str, admin_id:int, gift_costs:int, gift_send_date:str, reg_end_date:str, game_link='empty', sub_admin_id:int=0):
+    def add_game(self, game_name:str, admin_id:int, gift_costs:str, gift_send_date:str, reg_end_date:str, game_link='empty', sub_admin_id:int=0):
         sql = '''
             INSERT INTO games (game_name, admin_id, sub_admin_id, gift_costs, gift_send_date, reg_end_date, game_link) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
