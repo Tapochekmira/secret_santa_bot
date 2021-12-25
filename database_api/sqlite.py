@@ -85,6 +85,7 @@ class Database:
                 gamer_name VARCHAR(255) NOT NULL,
                 game_id INTEGER,
                 wish_list VARCHAR(1000),
+                interests_list VARCHAR(1000),
                 letter_to_santa VARCHAR(1000),
                 e_mail VARCHAR(255),
                 PRIMARY KEY (gamer_id)
@@ -93,12 +94,12 @@ class Database:
         self.execute(sql, commit=True)
 
 
-    def add_gamer(self, gamer_id:int, gamer_name:str, game_id:int, wish_list:str, letter_to_santa:str, e_mail:str):
+    def add_gamer(self, gamer_id:int, gamer_name:str, game_id:int, wish_list:str, interests_list:str, letter_to_santa:str, e_mail:str):
         sql = '''
-            INSERT INTO gamers (gamer_id, gamer_name, game_id, wish_list, letter_to_santa, e_mail)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO gamers (gamer_id, gamer_name, game_id, wish_list, interests_list, letter_to_santa, e_mail)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         '''
-        parameters = (gamer_id, gamer_name, game_id, wish_list, letter_to_santa, e_mail)
+        parameters = (gamer_id, gamer_name, game_id, wish_list, interests_list, letter_to_santa, e_mail)
         self.execute(sql, parameters=parameters, commit=True)
 
 
@@ -123,7 +124,7 @@ class Database:
                 admin_id INTEGER,
                 sub_admin_id INTEGER,
                 game_name VARCHAR(255),
-                gift_costs INTEGER,
+                gift_costs VARCHAR(255),
                 gift_send_date VARCHAR(255),
                 game_link VARCHAR(255),
                 reg_end_date VARCHAR(255)
@@ -132,7 +133,7 @@ class Database:
         self.execute(sql, commit=True)
 
 
-    def add_game(self, game_name:str, admin_id:int, gift_costs:int, gift_send_date:str, reg_end_date:str, game_link='empty', sub_admin_id:int=0):
+    def add_game(self, game_name:str, admin_id:int, gift_costs:str, gift_send_date:str, reg_end_date:str, game_link='empty', sub_admin_id:int=0):
         sql = '''
             INSERT INTO games (game_name, admin_id, sub_admin_id, gift_costs, gift_send_date, reg_end_date, game_link) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -207,11 +208,11 @@ class Database:
         '''
         Возвращает список кортежей из данных игроков, пример
         [
-            (1111, 'IVAN', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru'), 
-            (2222, 'VASIA', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru'), 
-            (3333, 'KATE', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru'), 
-            (4444, 'DIMA', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru'), 
-            (5555, 'PETRA', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru')
+            (1111, 'IVAN', 2, 'want iphone 13', 'intersts', Dear santa...', 'ivan@mai.ru'), 
+            (2222, 'VASIA', 2, 'want iphone 13', 'intersts', 'Dear santa...', 'ivan@mai.ru'), 
+            (3333, 'KATE', 2, 'want iphone 13', 'intersts', 'Dear santa...', 'ivan@mai.ru'), 
+            (4444, 'DIMA', 2, 'want iphone 13', 'intersts', 'Dear santa...', 'ivan@mai.ru'), 
+            (5555, 'PETRA', 2, 'want iphone 13', 'intersts', 'Dear santa...', 'ivan@mai.ru')
         ]
         
         '''
@@ -239,11 +240,11 @@ if __name__ == '__main__':
     # db = Database()
     # db.add_game('other_users', 2222, 0, '29.12', '25.12')
 
-    # db.add_gamer(1111, 'IVAN', 2, 'want iphone 13', 'Dear santa...', 'ivan@mai.ru')
-    # db.add_gamer(2222, 'VASIA', 2, 'iPad pro', 'Dear santa...', 'ivan@mai.ru')
-    # db.add_gamer(3333, 'KATE', 2, 'iWatch s7', 'Dear santa...', 'ivan@mai.ru')
-    # db.add_gamer(4444, 'DIMA', 2, 'macBook pro', 'Dear santa...', 'ivan@mai.ru')
-    # db.add_gamer(5555, 'PETRA', 2, 'iMac', 'Dear santa...', 'ivan@mai.ru')
+    # db.add_gamer(1111, 'IVAN', 2, 'want iphone 13', 'my interests', 'Dear santa...', 'ivan@mai.ru')
+    # db.add_gamer(2222, 'VASIA', 2, 'iPad pro', 'my interests', 'Dear santa...', 'ivan@mai.ru')
+    # db.add_gamer(3333, 'KATE', 2, 'iWatch s7', 'my interests', 'Dear santa...', 'ivan@mai.ru')
+    # db.add_gamer(4444, 'DIMA', 2, 'macBook pro', 'my interests', 'Dear santa...', 'ivan@mai.ru')
+    # db.add_gamer(5555, 'PETRA', 2, 'iMac', 'my interests', 'Dear santa...', 'ivan@mai.ru')
 
     # result = db.get_games_where_user_is_admin(1337)
     # result = db.get_game_id(2222, 'other_users')
