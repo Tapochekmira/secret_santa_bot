@@ -81,14 +81,14 @@ class Database:
     def create_gamers_table(self):
         sql = '''
             CREATE TABLE IF NOT EXISTS gamers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 gamer_id INTEGER,
                 gamer_name VARCHAR(255) NOT NULL,
                 game_id INTEGER,
                 wish_list VARCHAR(1000),
                 interests_list VARCHAR(1000),
                 letter_to_santa VARCHAR(1000),
-                e_mail VARCHAR(255),
-                PRIMARY KEY (gamer_id)
+                e_mail VARCHAR(255)
             );
         '''
         self.execute(sql, commit=True)
@@ -103,20 +103,21 @@ class Database:
         self.execute(sql, parameters=parameters, commit=True)
 
 
-    def get_gamer(self, gamer_id:int):
+    def get_gamer(self, gamer_id:int, game_id:int):
         '''
         Возвращает данные игрока по id
         '''
         sql = 'SELECT * FROM gamers WHERE '
         kwargs = {
-            'gamer_id':gamer_id
+            'gamer_id': gamer_id,
+            'game_id': game_id
         }
         sql, parameters = self.format_args(sql, kwargs)
         data = self.execute(sql, parameters, fetchone=True)
 
         return data
 
-
+    
     def create_table_games(self):
         sql = '''
             CREATE TABLE IF NOT EXISTS games (
@@ -176,18 +177,19 @@ class Database:
         return data[0][0]
 
     
-    def get_game_id_by_gamer_id(self, gamer_id:int):
+    def get_game_ids_by_gamer_id(self, gamer_id:int):
         '''
-        Возвращает id игры в которой учавствует игрок
+        Возвращает список id игр в которой учавствует игрок
         '''
         sql = 'SELECT * FROM gamers WHERE '
         kwargs = {
             'gamer_id':gamer_id
         }
         sql, parameters = self.format_args(sql, kwargs)
-        data = self.execute(sql, parameters, fetchone=True)
+        data = self.execute(sql, parameters, fetchall=True)
+        game_ids = [gamer[3] for gamer in data]
 
-        return data[2]
+        return game_ids
 
 
     def get_game(self, game_id:int):
@@ -230,7 +232,7 @@ class Database:
 
     def get_random_wish_list(self, game_id):
         gamers = self.get_all_gamers_from_game(game_id)
-        wish_lists = [wish[3] for wish in gamers]
+        wish_lists = [wish[4] for wish in gamers]
         random_wish = wish_lists[random.randint(0, len(wish_lists)-1)]
         
         return random_wish
@@ -241,6 +243,7 @@ if __name__ == '__main__':
     # db.add_game('other_users', 2222, 0, '29.12', '25.12')
 
     # db.add_gamer(1111, 'IVAN', 2, 'want iphone 13', 'my interests', 'Dear santa...', 'ivan@mai.ru')
+    # db.add_gamer(1111, 'IVAN', 1, 'want iphone 13', 'my interests', 'Dear santa...', 'ivan@mai.ru')
     # db.add_gamer(2222, 'VASIA', 2, 'iPad pro', 'my interests', 'Dear santa...', 'ivan@mai.ru')
     # db.add_gamer(3333, 'KATE', 2, 'iWatch s7', 'my interests', 'Dear santa...', 'ivan@mai.ru')
     # db.add_gamer(4444, 'DIMA', 2, 'macBook pro', 'my interests', 'Dear santa...', 'ivan@mai.ru')
@@ -252,10 +255,10 @@ if __name__ == '__main__':
     # result = db.get_all_gamers_from_game(2)
     # result = db.get_game(1)
     # result = db.get_gamer(1111)
-    # result = db.get_game_id_by_gamer_id(1111)
+    # result = db.get_game_ids_by_gamer_id(1111)
     # db.get_random_wish_list(2)
 
-    # db.update_game_link(1, 'some_game_link')
+    # result = db.get_gamer(1111, 1)
     # db.update_sub_admin(1, 89898989)
 
 
