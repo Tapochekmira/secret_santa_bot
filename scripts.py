@@ -1,10 +1,11 @@
-from random import randint
 import re
+from random import randint
 
 # тесовый набор
-players_1 = ['Katy', 'John', 'Bill', 'Marry']  
+players_1 = ['Katy', 'John', 'Bill', 'Marry']
 players_2 = ['Katy', 'John']
 players_3 = ['Katy', 'John', 'Bill']
+
 
 def drawing_of_lots(players):
     result = {}
@@ -20,7 +21,8 @@ def drawing_of_lots(players):
 
 
 def is_valid_email(email):
-    regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
+    regex = re.compile(
+        r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
     if re.fullmatch(regex, email):
         return True
     else:
