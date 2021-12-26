@@ -193,7 +193,12 @@ def display_game_link(update, context):
         Вот ссылка для участия в игре:
         {game_link}'''))
     new_game.update_game_link(game_id, game_link)
-    pprint(new_game.get_games_where_user_is_admin(admin_id))
+    print(new_game.get_games_where_user_is_admin(admin_id))
+    context.job_queue.run_once(
+        sort_after_registration_end,
+        current_game['time_to_sort'],
+        context=game_id
+    )
     return States.ADMIN_TOOL_BOARD
 
 
