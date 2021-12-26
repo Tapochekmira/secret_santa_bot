@@ -1,5 +1,5 @@
-import sqlite3
 import random
+import sqlite3
 
 
 class Database:
@@ -13,15 +13,14 @@ class Database:
     def connection(self):
         return sqlite3.connect(self.path_to_db)
 
-
-    def execute (
-        self, 
-        sql: str, 
-        parameters: tuple = None, 
-        fetchone = False,
-        fetchall = False,
-        commit = False 
-        ):
+    def execute(
+            self,
+            sql: str,
+            parameters: tuple = None,
+            fetchone=False,
+            fetchall=False,
+            commit=False
+    ):
 
         if parameters is None:
             parameters = tuple()
@@ -29,7 +28,7 @@ class Database:
         connection = self.connection
         cursor = connection.cursor()
         cursor.execute(sql, parameters)
-        
+
         data = None
 
         if commit:
@@ -46,11 +45,10 @@ class Database:
         return data
 
     @staticmethod
-    def format_args(sql, parameters:dict):
+    def format_args(sql, parameters: dict):
         sql += ' AND '.join([f'{item} = ?' for item in parameters])
 
         return sql, tuple(parameters.values())
-
 
     def create_cash_table(self):
         sql = '''
@@ -62,8 +60,7 @@ class Database:
         '''
         self.execute(sql, commit=True)
 
-    
-    def add_cash(self, id:int, cash_data:str):
+    def add_cash(self, id: int, cash_data: str):
         sql = '''
             INSERT OR REPLACE INTO cash (id, cash_data)
             VALUES (?, ?)
@@ -71,13 +68,11 @@ class Database:
         parameters = (id, cash_data)
         self.execute(sql, parameters=parameters, commit=True)
 
-    
-    def get_cash(self, id:int):
+    def get_cash(self, id: int):
         sql = f'SELECT * FROM cash WHERE id={id}'
         data = self.execute(sql, fetchall=True)
 
         return data[0][1]
-
 
     def create_gamers_table(self):
         sql = '''
@@ -95,16 +90,15 @@ class Database:
         '''
         self.execute(sql, commit=True)
 
-
     def add_gamer(
-        self, gamer_id:int,
-        gamer_name:str,
-        game_id:int,
-        wish_list:str,
-        interests_list:str,
-        letter_to_santa:str,
-        e_mail:str,
-        present_to:int=None
+            self, gamer_id: int,
+            gamer_name: str,
+            game_id: int,
+            wish_list: str,
+            interests_list: str,
+            letter_to_santa: str,
+            e_mail: str,
+            present_to: int = None
     ):
         sql = '''
             INSERT INTO gamers
@@ -132,8 +126,7 @@ class Database:
         )
         self.execute(sql, parameters=parameters, commit=True)
 
-
-    def get_gamer(self, gamer_id:int, game_id:int):
+    def get_gamer(self, gamer_id: int, game_id: int):
         '''
         Возвращает данные игрока по id
         '''
@@ -147,13 +140,11 @@ class Database:
 
         return data
 
-
-    def update_gamer_present_to(self, gamer_id:int, whom_present:int):
+    def update_gamer_present_to(self, gamer_id: int, whom_present: int):
         sql = f'UPDATE gamers SET present_to="{whom_present}"'
         sql += f' WHERE id={gamer_id}'
 
         self.execute(sql, commit=True)
-    
 
     def create_table_games(self):
         sql = '''
@@ -170,16 +161,15 @@ class Database:
         '''
         self.execute(sql, commit=True)
 
-
     def add_game(
-        self,
-        game_name:str,
-        admin_id:int,
-        gift_costs:str,
-        gift_send_date:str,
-        reg_end_date:str,
-        game_link='empty',
-        sub_admin_id:int=0
+            self,
+            game_name: str,
+            admin_id: int,
+            gift_costs: str,
+            gift_send_date: str,
+            reg_end_date: str,
+            game_link='empty',
+            sub_admin_id: int = 0
     ):
         sql = '''
             INSERT INTO games (
@@ -204,33 +194,29 @@ class Database:
         )
         self.execute(sql, parameters=parameters, commit=True)
 
-
-    def update_sub_admin(self, game_id:int, sub_admin_id:str):
+    def update_sub_admin(self, game_id: int, sub_admin_id: str):
         sql = f'UPDATE games SET sub_admin_id="{sub_admin_id}" WHERE id={game_id}'
         self.execute(sql, commit=True)
 
-    
-    def update_game_link(self, game_id:int, game_link:str):
+    def update_game_link(self, game_id: int, game_link: str):
         sql = f'UPDATE games SET game_link="{game_link}" WHERE id={game_id}'
         self.execute(sql, commit=True)
-        
 
-    def get_games_where_user_is_admin(self, id:int):
+    def get_games_where_user_is_admin(self, id: int):
         sql = f'SELECT * FROM games WHERE admin_id={id}'
         data = self.execute(sql, fetchall=True)
 
         return data
 
-
-    def get_game_id(self, admin_id:int, game_name:str):
+    def get_game_id(self, admin_id: int, game_name: str):
         '''
         Возвращает id игры по admin_id и названию игры
         '''
         sql = 'SELECT * FROM games WHERE '
 
         kwargs = {
-            'admin_id':admin_id,
-            'game_name':game_name
+            'admin_id': admin_id,
+            'game_name': game_name
         }
 
         sql, parameters = self.format_args(sql, kwargs)
@@ -238,14 +224,13 @@ class Database:
 
         return data[0][0]
 
-    
-    def get_game_ids_by_gamer_id(self, gamer_id:int):
+    def get_game_ids_by_gamer_id(self, gamer_id: int):
         '''
         Возвращает список id игр в которой учавствует игрок
         '''
         sql = 'SELECT * FROM gamers WHERE '
         kwargs = {
-            'gamer_id':gamer_id
+            'gamer_id': gamer_id
         }
         sql, parameters = self.format_args(sql, kwargs)
         data = self.execute(sql, parameters, fetchall=True)
@@ -253,22 +238,20 @@ class Database:
 
         return game_ids
 
-
-    def get_game(self, game_id:int):
+    def get_game(self, game_id: int):
         '''
         Возвращает данные игры по id
         '''
         sql = 'SELECT * FROM games WHERE '
         kwargs = {
-            'id':game_id
+            'id': game_id
         }
         sql, parameters = self.format_args(sql, kwargs)
         data = self.execute(sql, parameters, fetchone=True)
 
         return data
 
-
-    def get_all_gamers_from_game(self, game_id:int):
+    def get_all_gamers_from_game(self, game_id: int):
         '''
         Возвращает список кортежей из данных игроков, пример
         [
@@ -283,7 +266,7 @@ class Database:
         sql = 'SELECT * FROM gamers WHERE '
 
         kwargs = {
-            'game_id':game_id
+            'game_id': game_id
         }
 
         sql, parameters = self.format_args(sql, kwargs)
@@ -291,12 +274,11 @@ class Database:
 
         return data
 
-
     def get_random_wish_list(self, game_id):
         gamers = self.get_all_gamers_from_game(game_id)
         wish_lists = [wish[4] for wish in gamers]
-        random_wish = wish_lists[random.randint(0, len(wish_lists)-1)]
-        
+        random_wish = wish_lists[random.randint(0, len(wish_lists) - 1)]
+
         return random_wish
 
 
@@ -324,13 +306,5 @@ if __name__ == '__main__':
     # result = db.get_gamer(1111, 1)
     # db.update_sub_admin(1, 89898989)
 
-
-
     # print(result)
     pass
-
-    
-    
-
-
-
