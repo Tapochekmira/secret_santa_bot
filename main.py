@@ -1,8 +1,8 @@
 import logging
 import os
 import time
+from datetime import date, datetime
 from enum import Enum
-from pprint import pprint
 from textwrap import dedent
 
 from dotenv import load_dotenv
@@ -69,13 +69,6 @@ def check_gift_cost_restriction(update, context):
 
 def choose_gift_cost_limit(update, context):
     gift_cost = update.message.text
-    if gift_cost == 'до 500':
-        gift_cost = 1
-    elif gift_cost == 'от 500 до 1000':
-        gift_cost = 2
-    else:
-        gift_cost = 3
-
     game_cache = db
     admin_id = update.message.chat_id
     current_game = eval(game_cache.get_cash(id=admin_id))
@@ -102,7 +95,7 @@ def choose_registration_period(update, context):
     game_cache = db
     admin_id = update.message.chat_id
     current_game = eval(game_cache.get_cash(id=admin_id))
-    current_game['gift_costs'] = 0
+    current_game['gift_costs'] = 'Нет ограничений'
     print(current_game)
     game_cache.add_cash(id=admin_id, cash_data=str(current_game))
 
@@ -113,6 +106,15 @@ def choose_registration_period(update, context):
     return States.CHOOSE_SEND_DATE
 
 
+def get_time_to_sort(reg_end_date):
+    reg_end_date = datetime.strptime(reg_end_date, '%d.%m.%Y').date()
+    game_start_date = date.today()
+
+    difference = reg_end_date - game_start_date
+    seconds_in_day = 24 * 60 * 60
+    return difference.days * seconds_in_day
+
+
 def choose_send_gift_date(update, context):
     game_cache = db
     admin_id = update.message.chat_id
@@ -120,6 +122,8 @@ def choose_send_gift_date(update, context):
     reg_end_date = reg_date.split(' до ')[1]
     current_game = eval(game_cache.get_cash(id=admin_id))
     current_game['reg_end_date'] = reg_end_date
+    time_to_sort = get_time_to_sort(reg_end_date)
+    current_game['time_to_sort'] = 10  # abs(time_to_sort)
     print(current_game)
     game_cache.add_cash(id=admin_id, cash_data=str(current_game))
 
@@ -143,6 +147,12 @@ def check_send_date(send_date, end_registration_date):
         return False
 
 
+def sort_after_registration_end(context):
+    game_db = db
+    game_id = context.job.context
+    print(game_db.get_game(game_id))
+
+
 def display_game_link(update, context):
     game_cache = db
     admin_id = update.message.chat_id
@@ -164,7 +174,7 @@ def display_game_link(update, context):
     new_game.add_game(
         game_name=current_game['game_name'],
         admin_id=int(admin_id),
-        gift_costs=int(current_game['gift_costs']),
+        gift_costs=current_game['gift_costs'],
         gift_send_date=current_game['gift_send_date'],
         reg_end_date=current_game['reg_end_date'],
         game_link='empty',
@@ -351,25 +361,27 @@ def finish_player_info_enter(update, context):
         gamer_id=int(gamer_id),
         game_id=int(current_gamer['game_id']),
         wish_list=current_gamer['wish_list'],
+        interests_list=current_gamer['interests_list'],
         letter_to_santa=current_gamer['letter_to_santa'],
         e_mail=current_gamer['e_mail'],
     )
-    print(new_gamer.get_gamer(gamer_id))
+    print(new_gamer.get_gamer(gamer_id, current_gamer['game_id']))
 
+    current_game = new_gamer.get_game(current_gamer['game_id'])
     update.message.reply_text(
         dedent(f'''\
         Превосходно, ты в игре! 
-        31.12.2021 мы проведем жеребьевку 
+        {current_game[5]} мы проведем жеребьевку 
         и ты узнаешь имя и контакты своего тайного друга.
         Ему и нужно будет подарить подарок!'''))
 
-    return output_game_info_to_gamer(update, context)
+    return States.OUTPUT_PLAYER_INFO  # output_game_info_to_gamer(update, context)
 
 
 def output_game_info_to_gamer(update, context):
     games_db = db
     gamer_id = update.message.chat_id
-    game_id = games_db.get_game_id_by_gamer_id(gamer_id)
+    game_id = games_db.get_game_ids_by_gamer_id(gamer_id)
     current_game = games_db.get_game(game_id)
     current_gamer = games_db.get_gamer(gamer_id)
     print(current_game)
@@ -382,13 +394,13 @@ def output_game_info_to_gamer(update, context):
         Ограничение стоимости подарка: {current_game[4]}
         Период регистрации участников: до {current_game[5]}
         Дата отправки подарка: {current_game[7]}
-
+ 
         Информация о тебе:
         Имя: {current_gamer[1]}
         Твой лист пожеланий: {current_gamer[3]}
-        Твой лист интересов: current_gamer[?]
-        Твое сообщение санте: {current_gamer[4]}
-        Твой e_mail: {current_gamer[5]}'''))
+        Твой лист интересов: {current_gamer[4]}
+        Твое сообщение санте: {current_gamer[5]}
+        Твой e_mail: {current_gamer[6]}'''))
     return States.OUTPUT_PLAYER_INFO
 
 
