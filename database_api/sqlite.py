@@ -27,26 +27,27 @@ class Database:
             parameters = tuple()
 
         connection = self.connection
-
         cursor = connection.cursor()
-        data = None
         cursor.execute(sql, parameters)
         
+        data = None
+
         if commit:
             connection.commit()
+
         if fetchone:
             data = cursor.fetchone()
+
         if fetchall:
             data = cursor.fetchall()
+
         connection.close()
 
         return data
 
     @staticmethod
     def format_args(sql, parameters:dict):
-        sql += ' AND '.join([
-            f'{item} = ?' for item in parameters
-        ])
+        sql += ' AND '.join([f'{item} = ?' for item in parameters])
 
         return sql, tuple(parameters.values())
 
@@ -88,18 +89,47 @@ class Database:
                 wish_list VARCHAR(1000),
                 interests_list VARCHAR(1000),
                 letter_to_santa VARCHAR(1000),
+                present_to INTEGER,
                 e_mail VARCHAR(255)
             );
         '''
         self.execute(sql, commit=True)
 
 
-    def add_gamer(self, gamer_id:int, gamer_name:str, game_id:int, wish_list:str, interests_list:str, letter_to_santa:str, e_mail:str):
+    def add_gamer(
+        self, gamer_id:int,
+        gamer_name:str,
+        game_id:int,
+        wish_list:str,
+        interests_list:str,
+        letter_to_santa:str,
+        e_mail:str,
+        present_to:int=None
+    ):
         sql = '''
-            INSERT INTO gamers (gamer_id, gamer_name, game_id, wish_list, interests_list, letter_to_santa, e_mail)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO gamers
+                (
+                    gamer_id,
+                    gamer_name,
+                    game_id,
+                    wish_list,
+                    interests_list,
+                    letter_to_santa,
+                    present_to, 
+                    e_mail
+                )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         '''
-        parameters = (gamer_id, gamer_name, game_id, wish_list, interests_list, letter_to_santa, e_mail)
+        parameters = (
+            gamer_id,
+            gamer_name,
+            game_id,
+            wish_list,
+            interests_list,
+            letter_to_santa,
+            present_to,
+            e_mail
+        )
         self.execute(sql, parameters=parameters, commit=True)
 
 
@@ -117,7 +147,14 @@ class Database:
 
         return data
 
+
+    def update_gamer_present_to(self, gamer_id:int, whom_present:int):
+        sql = f'UPDATE gamers SET present_to="{whom_present}"'
+        sql += f' WHERE id={gamer_id}'
+
+        self.execute(sql, commit=True)
     
+
     def create_table_games(self):
         sql = '''
             CREATE TABLE IF NOT EXISTS games (
@@ -134,18 +171,43 @@ class Database:
         self.execute(sql, commit=True)
 
 
-    def add_game(self, game_name:str, admin_id:int, gift_costs:str, gift_send_date:str, reg_end_date:str, game_link='empty', sub_admin_id:int=0):
+    def add_game(
+        self,
+        game_name:str,
+        admin_id:int,
+        gift_costs:str,
+        gift_send_date:str,
+        reg_end_date:str,
+        game_link='empty',
+        sub_admin_id:int=0
+    ):
         sql = '''
-            INSERT INTO games (game_name, admin_id, sub_admin_id, gift_costs, gift_send_date, reg_end_date, game_link) 
+            INSERT INTO games (
+                game_name,
+                admin_id,
+                sub_admin_id,
+                gift_costs,
+                gift_send_date,
+                reg_end_date,
+                game_link
+            )
             VALUES (?, ?, ?, ?, ?, ?, ?)
         '''
-        parameters = (game_name, admin_id, sub_admin_id, gift_costs, gift_send_date, reg_end_date, game_link)
+        parameters = (
+            game_name,
+            admin_id,
+            sub_admin_id,
+            gift_costs,
+            gift_send_date,
+            reg_end_date,
+            game_link
+        )
         self.execute(sql, parameters=parameters, commit=True)
 
 
     def update_sub_admin(self, game_id:int, sub_admin_id:str):
-            sql = f'UPDATE games SET sub_admin_id="{sub_admin_id}" WHERE id={game_id}'
-            self.execute(sql, commit=True)
+        sql = f'UPDATE games SET sub_admin_id="{sub_admin_id}" WHERE id={game_id}'
+        self.execute(sql, commit=True)
 
     
     def update_game_link(self, game_id:int, game_link:str):
@@ -257,6 +319,7 @@ if __name__ == '__main__':
     # result = db.get_gamer(1111)
     # result = db.get_game_ids_by_gamer_id(1111)
     # db.get_random_wish_list(2)
+    # db.update_gamer_present_to(1, 8888)
 
     # result = db.get_gamer(1111, 1)
     # db.update_sub_admin(1, 89898989)
