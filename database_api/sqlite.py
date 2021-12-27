@@ -146,6 +146,12 @@ class Database:
 
         self.execute(sql, commit=True)
 
+    def update_gamer_parameter(self, gamer_id: int, parameter_name: str, parameter: str):
+        sql = f'UPDATE gamers SET {parameter_name}="{parameter}"'
+        sql += f' WHERE id={gamer_id}'
+
+        self.execute(sql, commit=True)
+
     def create_table_games(self):
         sql = '''
             CREATE TABLE IF NOT EXISTS games (
