@@ -30,7 +30,7 @@ def create_registration_period_keyboard():
     game_start_date = date.today().strftime("%d.%m.%Y")
     keyboard = [
         [KeyboardButton(
-                text=f'от {game_start_date} до 25.12.2021'
+                text=f'от {game_start_date} до 27.12.2021'
         )],
         [KeyboardButton(
             text=f'от {game_start_date} до 31.12.2021'

@@ -12,7 +12,7 @@ def get_time_to_sort(reg_end_date):
 
     difference = abs(reg_end_date - game_start_date)
     seconds_in_day = 24 * 60 * 60
-    return 180  # difference.days * seconds_in_day + 60 * 60 * 18.75
+    return 120  # difference.days * seconds_in_day + 60 * 60 * 18.75
 
 
 def drawing_of_lots(players):
